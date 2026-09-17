@@ -113,7 +113,8 @@ flowName .............. GeneralOAuthFlow
 disallowedUserAgent ... false
 ```
 
-with Google's own "Sign in to continue to …" screen rendered in the window.
+with Google's own "Sign in to continue to …" screen rendered in the window —
+captured at `docs/probe-google-signin-2026-09-18.png`.
 
 ### `npm run probe:update` — the update channel, proven
 
