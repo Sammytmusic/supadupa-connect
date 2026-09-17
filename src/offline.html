@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en-NZ">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SupaDupa</title>
+<!-- The only page this app ships. It is shown when deploy.supadupa.nz
+     cannot be reached, so that a flat wifi says so in words instead of
+     showing Chromium's error page inside a branded window.
+     Brand matches public/connections.html: navy ground, red action,
+     cream text. No webfont — this page must draw with no network. -->
+<style>
+  :root { --red: #E74C3C; --cream: #F7F3E9; --navy: #2C3E50; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; height: 100%; }
+  body {
+    background: var(--navy); color: var(--cream);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 17px; line-height: 1.55; -webkit-font-smoothing: antialiased;
+    display: flex; align-items: center; justify-content: center; padding: 24px;
+  }
+  .card { max-width: 460px; text-align: center; }
+  h1 { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; margin: 0 0 12px; }
+  p { margin: 0 0 22px; color: rgba(247,243,233,0.72); font-size: 16px; }
+  button {
+    font-family: inherit; font-size: 15px; font-weight: 600; cursor: pointer;
+    border: 0; padding: 13px 26px; border-radius: 8px;
+    background: var(--red); color: #fff;
+  }
+  button:hover { opacity: 0.9; }
+  .note { margin-top: 26px; font-size: 13px; color: rgba(247,243,233,0.55); }
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1>We couldn&rsquo;t reach SupaDupa</h1>
+    <p>Check your internet connection and try again. Nothing was lost &mdash;
+       your sign-in picks up where it left off.</p>
+    <button type="button" id="retry">Try again</button>
+    <div class="note">Still stuck? Email sam@supadupa.nz.</div>
+  </div>
+<script>
+  // No bridge, no Node, no preload — this page reaches the live site the
+  // same way any page would, and the fence in main.js lets it through
+  // because it is the one address this app is for.
+  document.getElementById('retry').addEventListener('click', function () {
+    window.location.href = 'https://deploy.supadupa.nz/connections.html'
+  })
+</script>
+</body>
+</html>

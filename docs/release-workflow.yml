@@ -1,0 +1,67 @@
+# NOT ACTIVE YET — this file has to be copied to .github/workflows/release.yml
+# by hand, by someone whose GitHub token carries the `workflow` scope.
+#
+# The token this repo was created with (gh, account Sammytmusic) has
+# `read:org` and `repo` only, and GitHub refuses a push that creates or
+# updates anything under .github/workflows/ without `workflow`:
+#
+#   ! [remote rejected] refusing to allow an OAuth App to create or update
+#     workflow `.github/workflows/release.yml` without `workflow` scope
+#
+# So it sits here, complete and ready, rather than being quietly dropped.
+# Until it is in place, a release is made by hand — see README, Releasing.
+#
+# Build and publish a release when a v* tag is pushed.
+#
+# Runs on macOS, not Linux, for two reasons that are both about the
+# artefact rather than convenience:
+#   1. `ditto` keeps the .app's framework symlinks, so no repack step is
+#      needed here (see scripts/repack-mac-zip.mjs for what goes wrong
+#      when a Linux zip flattens them);
+#   2. signing and notarisation only exist on macOS, so this is the one
+#      place they can ever be switched on.
+#
+# SIGNING IS OFF and the build is unsigned until a Developer ID
+# certificate exists — see the README. When it does, add the four secrets
+# named at the bottom and delete the two `CSC_IDENTITY_AUTO_DISCOVERY`
+# lines; electron-builder picks the certificate up from the keychain it
+# imports and notarises from the same env.
+name: release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  mac:
+    runs-on: macos-14
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - run: npm ci
+
+      # The fence, before anything is packaged. It needs no display and
+      # takes under a second, so there is no excuse for shipping past it.
+      - run: npm test
+
+      - name: Build and publish
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Off until there is a certificate. With this false,
+          # electron-builder packages without looking for one instead of
+          # failing the build.
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+          # When the certificate exists, the four below replace the line
+          # above (repository secrets, none of them in this repo):
+          #   CSC_LINK, CSC_KEY_PASSWORD,
+          #   APPLE_ID, APPLE_APP_SPECIFIC_PASSWORD, APPLE_TEAM_ID
+        run: npx electron-builder --mac --arm64 --x64 --publish always

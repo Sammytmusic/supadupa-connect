@@ -1,0 +1,77 @@
+# electron-builder — how the app is packaged, signed and published.
+#
+# ── ONE DELIBERATE OMISSION, READ THIS BEFORE ADDING IT BACK ─────────────
+# `mac.notarize` is NOT set, and the mac build is NOT signed with a
+# Developer ID, because there is no Developer ID certificate to sign with.
+# Measured on Sam's Mac on 18 Sep 2026 (`security find-identity -v -p
+# codesigning` over SSH): "0 valid identities found" — the same result the
+# 1 Sep 2026 check recorded. Setting a `identity` or `notarize` block that
+# names a certificate nobody holds does not make a build signed; it makes
+# the build fail, or worse, succeed while claiming something untrue.
+#
+# WHAT TO CHANGE WHEN THE CERTIFICATE EXISTS (all of it, and nothing else):
+#   mac:
+#     identity: "Developer ID Application: <name> (<TEAMID>)"
+#     notarize:
+#       teamId: "<TEAMID>"
+# and in the environment: APPLE_ID, APPLE_APP_SPECIFIC_PASSWORD, APPLE_TEAM_ID.
+# Signing and notarising both require macOS — `codesign` and `notarytool`
+# exist nowhere else — so that build runs on a Mac or a macOS CI runner,
+# never on the Linux box this repo was written on.
+#
+# `hardenedRuntime` and the entitlements are already on, because they are
+# what notarisation will require and they cost nothing before then.
+
+appId: nz.supadupa.connect
+productName: SupaDupa Connect
+copyright: © SupaDupa
+
+directories:
+  output: dist
+  buildResources: build
+
+files:
+  - src/**/*
+  - package.json
+  - "!**/*.map"
+
+# The update channel. electron-updater reads the release assets published
+# here; `npm run release` uploads them. A new version reaches an installed
+# copy with no reinstall — the app checks on launch and every six hours.
+publish:
+  provider: github
+  owner: Sammytmusic
+  repo: supadupa-connect
+  releaseType: release
+
+mac:
+  category: public.app-category.business
+  target:
+    # zip ONLY in this file, on purpose. A .dmg cannot be built anywhere but
+    # macOS (electron-builder shells out to hdiutil), and zip is also the
+    # format electron-updater installs a mac update from — so the artefact
+    # that ships and the artefact that updates are the same one. Add dmg on
+    # the Mac build: `electron-builder --mac dmg zip`.
+    - target: zip
+      arch:
+        - arm64
+        - x64
+  hardenedRuntime: true
+  gatekeeperAssess: false
+  entitlements: build/entitlements.mac.plist
+  entitlementsInherit: build/entitlements.mac.plist
+  extendInfo:
+    # No camera, microphone, contacts or location is ever asked for, so no
+    # usage description is declared. A declared purpose string with no
+    # matching request is how an app ends up in a privacy pane it has no
+    # business being in.
+    LSMinimumSystemVersion: "11.0"
+
+linux:
+  target:
+    - AppImage
+  category: Office
+
+win:
+  target:
+    - nsis

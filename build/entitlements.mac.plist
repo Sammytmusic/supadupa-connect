@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <!-- The two Electron cannot run under the hardened runtime without.
+       Nothing else is claimed: this app has no microphone, no camera, no
+       files it reads, and no network server. -->
+  <key>com.apple.security.cs.allow-jit</key>
+  <true/>
+  <key>com.apple.security.cs.allow-unsigned-executable-memory</key>
+  <true/>
+  <!-- Outbound network only — it loads one website. -->
+  <key>com.apple.security.network.client</key>
+  <true/>
+</dict>
+</plist>

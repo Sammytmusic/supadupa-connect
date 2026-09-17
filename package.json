@@ -1,0 +1,34 @@
+{
+  "name": "supadupa-connect",
+  "productName": "SupaDupa Connect",
+  "version": "1.0.0",
+  "description": "The SupaDupa client sign-in, as a desktop app. One window, one page: sign in with Google so your credential reaches SupaDupa.",
+  "author": {
+    "name": "SupaDupa",
+    "email": "sam@supadupa.nz"
+  },
+  "license": "UNLICENSED",
+  "private": false,
+  "main": "src/main.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Sammytmusic/supadupa-connect.git"
+  },
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test tests/*.test.mjs",
+    "pack": "electron-builder --dir",
+    "dist:mac": "electron-builder --mac --arm64 --x64 --publish never",
+    "dist:linux": "electron-builder --linux --x64 --publish never",
+    "release": "electron-builder --mac --arm64 --x64 --publish always",
+    "probe": "electron tests/live/probe.js",
+    "repack": "node scripts/repack-mac-zip.mjs"
+  },
+  "devDependencies": {
+    "electron": "^38.2.0",
+    "electron-builder": "^26.0.12"
+  },
+  "dependencies": {
+    "electron-updater": "^6.6.2"
+  }
+}
