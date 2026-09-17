@@ -59,10 +59,15 @@ version actually doing the rendering. This is the same call the personal
 app makes for its own Google surfaces
 (`calmode-v2/src/main/index.ts:1345`).
 
-**An update channel.** `electron-updater` against this repo's GitHub
-Releases: the app checks on launch and every six hours, downloads a new
-version in the background, and offers a restart. Nobody fetches an
-installer twice.
+**An update channel**, wired but **not working until the app is signed.**
+`electron-updater` against this repo's GitHub Releases: the app checks on
+launch and every six hours, downloads a new version in the background, and
+offers a restart. Electron's own documentation states that automatic
+updating requires a signed app for it to work at all, and electron-builder
+carries the same warning — so on the unsigned 1.0.0 build this channel
+cannot deliver a new version, and a new version means a new download by
+hand. The wiring is here and starts working the day a Developer ID
+certificate does.
 
 **An offline page** (`src/offline.html`), so flat wifi says so in words
 instead of showing Chromium's error page inside a branded window.
@@ -123,7 +128,9 @@ version pretended back to 0.9.0, then separately downloads the exact
 `latest-mac.yml` a Mac copy fetches and checks every asset it names exists
 at the size it claims — a wrong size makes an update refuse itself with no
 symptom at all. Result on 18 Sep 2026: release `v1.0.0` resolved, both mac
-assets present, both sizes matching to the byte.
+assets present, both sizes matching to the byte. That proves the *feed* is
+correct; it does not prove an update can install, which an unsigned build
+cannot do at all — see above.
 
 ## Signing and notarisation — NOT DONE, and why
 
@@ -141,11 +148,35 @@ both need macOS *and* an Apple Developer Program membership; neither
 `codesign` nor `notarytool` exists on the Linux box this was built on, and
 no certificate exists on the Mac either.
 
-What that means for whoever installs it: macOS will refuse the first
-launch with *"SupaDupa Connect" cannot be opened because the developer
-cannot be verified*. The way past it is right-click → Open → Open, once.
-Every launch after that is normal. That is a real friction and the reason
-the certificate matters.
+What that means for whoever installs it: macOS refuses the first launch,
+and the way past it is **not** the old right-click → Open. Control-clicking
+an app to override the check **stopped working in macOS 15 Sequoia**
+(Apple, September 2024); the override now lives in System Settings only.
+Anyone on Sequoia or later — which is everyone — needs this instead.
+
+### First launch on macOS
+
+1. Unzip, and drag SupaDupa Connect into your Applications folder.
+2. Double-click it. macOS will say it cannot verify the developer. Click
+   **Done** — NOT "Move to Trash".
+3. Straight away, open System Settings, go to Privacy & Security, and
+   scroll down to Security. You will see a line saying SupaDupa Connect
+   was blocked. Click **Open Anyway** and enter your Mac password.
+4. The warning appears once more. Click **Open**.
+
+Do steps 2 to 4 one after another without a break.
+After this, the app opens normally by double-clicking.
+
+If instead you see *"damaged and can't be opened"* or *"contains
+malware"*, stop and tell us — that one cannot be worked around, and we
+will send a signed build.
+
+**Automatic updates do not work until the app is signed.** Electron's own
+documentation states that automatic updating requires a signed app for it
+to work at all, and electron-builder carries the same warning. So until
+the Developer ID certificate exists, a new version means a new download by
+hand. That, and the first launch above, are the two real frictions and the
+reason the certificate matters.
 
 `electron-builder.yml` already has `hardenedRuntime` and the entitlements
 on, because notarisation will require them. The whole change, when the
