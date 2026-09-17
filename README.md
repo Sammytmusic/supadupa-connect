@@ -76,6 +76,7 @@ npm test             # the fence, 14 cases, no display needed
 npm run dist:mac     # package for macOS (arm64 + x64)
 npm run repack       # REQUIRED after dist:mac on Linux — see below
 npm run probe        # drive the real sign-in and report what happened
+npm run probe:update # prove the update channel against the real release
 ```
 
 ### `npm run repack` — do not skip it on Linux
@@ -113,6 +114,15 @@ disallowedUserAgent ... false
 ```
 
 with Google's own "Sign in to continue to …" screen rendered in the window.
+
+### `npm run probe:update` — the update channel, proven
+
+Points electron-updater itself at the real GitHub release with the current
+version pretended back to 0.9.0, then separately downloads the exact
+`latest-mac.yml` a Mac copy fetches and checks every asset it names exists
+at the size it claims — a wrong size makes an update refuse itself with no
+symptom at all. Result on 18 Sep 2026: release `v1.0.0` resolved, both mac
+assets present, both sizes matching to the byte.
 
 ## Signing and notarisation — NOT DONE, and why
 

@@ -22,7 +22,8 @@
     "dist:linux": "electron-builder --linux --x64 --publish never",
     "release": "electron-builder --mac --arm64 --x64 --publish always",
     "probe": "electron tests/live/probe.js",
-    "repack": "node scripts/repack-mac-zip.mjs"
+    "repack": "node scripts/repack-mac-zip.mjs",
+    "probe:update": "electron tests/live/update-probe.js"
   },
   "devDependencies": {
     "electron": "^38.2.0",
